@@ -12,7 +12,7 @@
         <button><a href = '/cancel'>Cancel orders</a></button>
         <input type="submit" value="Buy">
 
-        {% if user.username %}
+        {% if user.is_authenticated %}
             <button><a href = '/logout'>Logout</a></button>
             <button><a href = '/order'>My Orders</a></button>
             <p>Your cash: {{user.cash}}</p>

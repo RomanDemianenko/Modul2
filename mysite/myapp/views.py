@@ -57,6 +57,7 @@ class BaseView(View):
 
 
 class UserLoginView(LoginView):
+    form_class = LoginForm
     success_url = '/'
     template_name = 'login.html'
 
@@ -88,34 +89,34 @@ class UserLoginView(LoginView):
 
 
 class RegistrationView(CreateView):
-    # model = MyUser
-    # form_class = RegistrationForm
-    # template_name = 'registration.html'
-    # success_url = '/'
-    def get(self, request, *args, **kwargs):
-        form = RegistrationForm(request.POST)
-        product = Product.objects.all()
-        context = {'form': form, 'product': product}
-        return render(request, 'registration.html', context)
-
-    def post(self, request, *args, **kwargs):
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            new_user = form.save(commit=False)
-            new_user.username = form.cleaned_data['username']
-            new_user.email = form.cleaned_data['email']
-            new_user.name = form.cleaned_data['name']
-            new_user.save()
-            new_user.set_password(form.cleaned_data['password'])
-            new_user.save()
-            MyUser.objects.create(user=new_user)
-            MyUser.objects.upgrade(cash='10000')
-            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
-            login(request, user)
-            messages.success(request, 'Welcomm in our club')
-            return HttpResponseRedirect('/')
-        context = {'form': form}
-        return render(request, 'registration.html', context)
+    model = MyUser
+    form_class = RegistrationForm
+    template_name = 'registration.html'
+    success_url = '/'
+    # def get(self, request, *args, **kwargs):
+    #     form = RegistrationForm(request.POST)
+    #     product = Product.objects.all()
+    #     context = {'form': form, 'product': product}
+    #     return render(request, 'registration.html', context)
+    #
+    # def post(self, request, *args, **kwargs):
+    #     form = RegistrationForm(request.POST)
+    #     if form.is_valid():
+    #         new_user = form.save(commit=False)
+    #         new_user.username = form.cleaned_data['username']
+    #         new_user.email = form.cleaned_data['email']
+    #         new_user.name = form.cleaned_data['name']
+    #         new_user.save()
+    #         new_user.set_password(form.cleaned_data['password'])
+    #         new_user.save()
+    #         MyUser.objects.create(user=new_user)
+    #         MyUser.objects.upgrade(cash='10000')
+    #         user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+    #         login(request, user)
+    #         messages.success(request, 'Welcomm in our club')
+    #         return HttpResponseRedirect('/')
+    #     context = {'form': form}
+    #     return render(request, 'registration.html', context)
 
 
 class UserLogout(LogoutView):

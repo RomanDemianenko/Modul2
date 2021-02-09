@@ -2,22 +2,12 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
 
-
 # Create your models here.
 from django.utils import timezone
 
 
 class MyUser(AbstractUser):
     cash = models.DecimalField(decimal_places=5, max_digits=15, default=10000)
-
-# class Customer(models.Model):
-#     user = models.ForeignKey(MyUser, related_name='costumer', on_delete=models.CASCADE)
-#     name = models.CharField(max_length=20)
-#     email = models.EmailField(unique=True)
-#
-#
-#     def __str__(self):
-#         return "Покупатель: {}".format(self.user)
 
 
 class Product(models.Model):

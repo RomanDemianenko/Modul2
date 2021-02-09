@@ -8,10 +8,10 @@ from myapp.models import Product, Order, MyUser
 class LoginForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        self.fields['username'].label = 'Login'
-        self.fields['password'].label = 'Password'
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(self, *args, **kwargs)
+    #     self.fields['username'].label = 'Login'
+    #     self.fields['password'].label = 'Password'
 
     def clean(self):
         username = self.cleaned_data['username']
@@ -22,7 +22,7 @@ class LoginForm(forms.ModelForm):
         if user:
             if not user.check_password(password):
                 raise forms.ValidationError(f'Incorect password')
-        return self.cleaned_data
+        return username, password
 
     class Meta:
         model = User
@@ -35,23 +35,23 @@ class RegistrationForm(forms.ModelForm):
     confirm_password = forms.CharField(widget=forms.PasswordInput)
     email = forms.EmailField(required=True)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        self.fields['username'].label = 'Login'
-        self.fields['password'].label = 'Password'
-        self.fields['confirm_password'].label = 'confirm_password'
-        self.fields['name'].label = 'name'
-        self.fields['email'].label = 'email'
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(self, *args, **kwargs)
+    #     self.fields['username'].label = 'Login'
+    #     self.fields['password'].label = 'Password'
+    #     self.fields['confirm_password'].label = 'confirm_password'
+    #     self.fields['name'].label = 'name'
+    #     self.fields['email'].label = 'email'
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if User.objects.filter(email=email).exists():
+        if MyUser.objects.filter(email=email).exists():
             raise forms.ValidationError(f'This email has already registration')
         return email
 
     def clean_username(self):
         username = self.cleaned_data['username']
-        if User.objects.filter(username=username).exists():
+        if MyUser.objects.filter(username=username).exists():
             raise forms.ValidationError(f'This {username} has already registration')
         return username
 
