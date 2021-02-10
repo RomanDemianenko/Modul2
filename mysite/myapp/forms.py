@@ -7,24 +7,24 @@ from myapp.models import Product, Order, MyUser
 
 
 class LoginForm(forms.Form):
-    username = forms.TextInput()
+    username = forms.CharField(max_length=20)
     password = forms.CharField(widget=forms.PasswordInput)
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(self, *args, **kwargs)
-    #     self.fields.get('username').label = 'Login'
-    #     self.fields.get('password').label = 'Password'
-
-    def clean(self):
-        username = self.cleaned_data.get('username')
-        password = self.cleaned_data.get('password')
-        if not MyUser.objects.filter(username=username).exists():
-            raise forms.ValidationError(f'Username with login {username} not find')
-        user = MyUser.objects.filter(username=username).first()
-        if user:
-            if not user.check_password(password):
-                raise forms.ValidationError(f'Incorect password')
-        return self.cleaned_data
+    # # def __init__(self, *args, **kwargs):
+    # #     super().__init__(self, *args, **kwargs)
+    # #     self.fields.get('username').label = 'Login'
+    # #     self.fields.get('password').label = 'Password'
+    #
+    # def clean(self):
+    #     username = self.cleaned_data.get('username')
+    #     password = self.cleaned_data.get('password')
+    #     if not MyUser.objects.filter(username=username).exists():
+    #         raise forms.ValidationError(f'Username with login {username} not find')
+    #     user = MyUser.objects.filter(username=username).first()
+    #     if user:
+    #         if not user.check_password(password):
+    #             raise forms.ValidationError(f'Incorect password')
+    #     return self.cleaned_data
 
     class Meta:
         model = MyUser

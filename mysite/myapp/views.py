@@ -1,8 +1,8 @@
 from datetime import datetime, timezone, timedelta
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, RedirectView
 from django.views.generic.base import View
 
-from myapp.forms import LoginForm, RegistrationForm, ProductForm, OrderForm
+from myapp.forms import RegistrationForm, ProductForm, OrderForm, LoginForm
 from myapp.models import Product, MyUser, Order, Cancel
 
 
@@ -47,9 +47,8 @@ from myapp.models import Product, MyUser, Order, Cancel
 
 
 class BaseView(View):
-
     def get(self, request, *args, **kwargs):
-        products = Product.objects.order_by('id')
+        products = Product.objects.order_by('-id')
         context = {
             'products': products
         }
@@ -60,6 +59,7 @@ class UserLoginView(LoginView):
     # form_class = AuthenticationForm
     # success_url = '/'
     # template_name = 'login.html'
+
     # http_method_names = ['get', 'post']
 
     # def get_success_url(self):
@@ -75,19 +75,30 @@ class UserLoginView(LoginView):
 
     def post(self, request, *args, **kwargs):
         # form = self.get_form(AuthenticationForm)
-        form = AuthenticationForm(request.POST)
+        form = LoginForm(request.POST)
+        print('hello1')
         if form.is_valid():
+            print('hello2')
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(username=username, password=password)
+            print('hello22')
             if user:
-                login(request, user)
-                messages.success(request, 'You are login')
-                return HttpResponseRedirect('/')
+                print('hello3')
+                if user.is_active:
+                    login(request, user)
+                    print('hello4')
+                    messages.success(request, 'You are login')
+                    return HttpResponseRedirect('/')
                 # return self.form_valid(form)
             else:
                 messages.warning(request, 'You have login already')
         else:
+            # username = form.cleaned_data['username']
+            # password = form.cleaned_data['password']
+            # user = authenticate(username=username, password=password)
+            # login(request, user)
+            print('hello45')
             return HttpResponseRedirect('/')
             # return self.form_invalid(form)
 
@@ -96,39 +107,40 @@ class UserLoginView(LoginView):
 
 
 class RegistrationView(CreateView):
-    # model = MyUser
-    # form_class = RegistrationForm
-    # template_name = 'registration.html'
-    # success_url = '/'
-    #
-    # def get_success_url(self):
-    #     return self.success_url
+    model = MyUser
+    form_class = RegistrationForm
+    template_name = 'registration.html'
+    success_url = '/'
+
+    def get_success_url(self):
+        return self.success_url
+
     http_method_names = ['get', 'post']
 
-    def get(self, request, *args, **kwargs):
-        form = RegistrationForm(request.POST)
-        product = Product.objects.all()
-        context = {'form': form, 'product': product}
-        return render(request, 'registration.html', context)
-
-    def post(self, request, *args, **kwargs):
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            new_user = form.save(commit=False)
-            new_user.username = form.cleaned_data['username']
-            new_user.email = form.cleaned_data['email']
-            new_user.name = form.cleaned_data['name']
-            new_user.save()
-            new_user.set_password(form.cleaned_data['password'])
-            new_user.save()
-            MyUser.objects.create(user=new_user)
-            MyUser.objects.upgrade(cash='10000')
-            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
-            login(request, user)
-            messages.success(request, 'Welcomm in our club')
-            return HttpResponseRedirect('/')
-        context = {'form': form}
-        return render(request, 'registration.html', context)
+    # def get(self, request, *args, **kwargs):
+    #     form = RegistrationForm(request.POST)
+    #     product = Product.objects.all()
+    #     context = {'form': form, 'product': product}
+    #     return render(request, 'registration.html', context)
+    #
+    # def post(self, request, *args, **kwargs):
+    #     form = RegistrationForm(request.POST)
+    #     if form.is_valid():
+    #         new_user = form.save(commit=False)
+    #         new_user.username = form.cleaned_data['username']
+    #         new_user.email = form.cleaned_data['email']
+    #         new_user.name = form.cleaned_data['name']
+    #         new_user.save()
+    #         new_user.set_password(form.cleaned_data['password'])
+    #         new_user.save()
+    #         MyUser.objects.create(user=new_user)
+    #         MyUser.objects.upgrade(cash='10000')
+    #         user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+    #         login(request, user)
+    #         messages.success(request, 'Welcomm in our club')
+    #         return HttpResponseRedirect('/')
+    #     context = {'form': form}
+    #     return render(request, 'registration.html', context)
 
 
 class UserLogout(LogoutView):

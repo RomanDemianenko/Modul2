@@ -7,7 +7,7 @@ from myapp.views import UserLoginView, UserLogout, RegistrationView, ProductList
 urlpatterns = [
     path('', ProductListView.as_view(), name='products'),
     # path('1/', UserLoginView.as_view()),
-    path('', BuyingRedirectView.as_view(), name='buying'),
+    # path('', BuyingRedirectView.as_view(), name='buying'),
     path('admin/', admin.site.urls),
     path('create/', ProductCreateView.as_view(), name='create'),
     path('login/', UserLoginView.as_view(), name='login'),
