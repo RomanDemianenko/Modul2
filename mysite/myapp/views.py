@@ -67,14 +67,15 @@ class UserLoginView(LoginView):
 
     def get(self, request, *args, **kwargs):
         form = AuthenticationForm(request.POST)
-        product = Product.objects.all()
-        context = {'form': form, 'product': product}
+        # product = Product.objects.all()
+        context = {'form': form}
         # return self.render_to_response(self.get_context_data())
         # return super().get(request=self.request)
         return render(request, 'login.html', context)
 
     def post(self, request, *args, **kwargs):
-        form = LoginForm(request.POST)
+        # form = self.get_form(AuthenticationForm)
+        form = AuthenticationForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
@@ -83,11 +84,13 @@ class UserLoginView(LoginView):
                 login(request, user)
                 messages.success(request, 'You are login')
                 return HttpResponseRedirect('/')
-                # return self.form_valid(login)
+                # return self.form_valid(form)
             else:
                 messages.warning(request, 'You have login already')
         else:
-            return self.form_invalid(form)
+            return HttpResponseRedirect('/')
+            # return self.form_invalid(form)
+
         context = {'form': form}
         return render(request, 'login.html', context)
 
