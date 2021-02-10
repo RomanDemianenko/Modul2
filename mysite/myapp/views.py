@@ -66,12 +66,12 @@ class UserLoginView(LoginView):
     #     return self.success_url
 
     def get(self, request, *args, **kwargs):
-        # form = AuthenticationForm(request.POST)
-        # product = Product.objects.all()
-        # context = {'form': form, 'product': product}
-        return self.render_to_response(self.get_context_data())
+        form = AuthenticationForm(request.POST)
+        product = Product.objects.all()
+        context = {'form': form, 'product': product}
+        # return self.render_to_response(self.get_context_data())
         # return super().get(request=self.request)
-        # return render(request, 'login.html', context)
+        return render(request, 'login.html', context)
 
     def post(self, request, *args, **kwargs):
         form = LoginForm(request.POST)
@@ -139,13 +139,14 @@ class ProductCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'request.user.is_superuser'
     model = Product
     form_class = ProductForm
-    success_url = '/products/'
-    template_name = 'base.html'
+    success_url = '/'
+    template_name = 'create.html'
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'request.user.is_superuser'
     model = Product
+
     fields = '__all__'
     template_name = 'update.html'
     success_url = '/'

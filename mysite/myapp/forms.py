@@ -72,7 +72,7 @@ class RegistrationForm(forms.ModelForm):
 class ProductForm(ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'image', 'description', 'price', 'available']
+        fields = ['name', 'image', 'description', 'price', 'quantity', 'available']
 
 
 class OrderForm(ModelForm):
