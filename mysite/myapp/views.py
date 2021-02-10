@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LogoutView, LoginView
 from django.http import HttpResponse, HttpResponseRedirect
@@ -57,76 +57,86 @@ class BaseView(View):
 
 
 class UserLoginView(LoginView):
-    form_class = LoginForm
-    success_url = '/'
-    template_name = 'login.html'
+    # form_class = AuthenticationForm
+    # success_url = '/'
+    # template_name = 'login.html'
+    # http_method_names = ['get', 'post']
 
-    def get_success_url(self):
-        return self.success_url
+    # def get_success_url(self):
+    #     return self.success_url
 
-    # def get(self, request, *args, **kwargs):
-    #     form = LoginForm(request.POST)
-    #     product = Product.objects.all()
-    #     context = {'form': form, 'product': product}
-    #     return render(request, 'login.html', context)
-    #
-    # def post(self, request, *args, **kwargs):
-    #     form = LoginForm(request.POST)
-    #     if form.is_valid():
-    #         username = form.cleaned_data['username']
-    #         password = form.cleaned_data['password']
-    #         user = authenticate(username=username, password=password)
-    #         if user:
-    #             login(request, user)
-    #             messages.success(request, 'You are login')
-    #             return HttpResponseRedirect('/')
-    #
-    #         else:
-    #             messages.warning(request, 'You are login')
-    #
-    #     context = {'form': form}
-    #     return render(request, 'login.html', context)
+    def get(self, request, *args, **kwargs):
+        # form = AuthenticationForm(request.POST)
+        # product = Product.objects.all()
+        # context = {'form': form, 'product': product}
+        return self.render_to_response(self.get_context_data())
+        # return super().get(request=self.request)
+        # return render(request, 'login.html', context)
+
+    def post(self, request, *args, **kwargs):
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(username=username, password=password)
+            if user:
+                login(request, user)
+                messages.success(request, 'You are login')
+                return HttpResponseRedirect('/')
+                # return self.form_valid(login)
+            else:
+                messages.warning(request, 'You have login already')
+        else:
+            return self.form_invalid(form)
+        context = {'form': form}
+        return render(request, 'login.html', context)
 
 
 class RegistrationView(CreateView):
-    model = MyUser
-    form_class = RegistrationForm
-    template_name = 'registration.html'
-    success_url = '/'
-    # def get(self, request, *args, **kwargs):
-    #     form = RegistrationForm(request.POST)
-    #     product = Product.objects.all()
-    #     context = {'form': form, 'product': product}
-    #     return render(request, 'registration.html', context)
+    # model = MyUser
+    # form_class = RegistrationForm
+    # template_name = 'registration.html'
+    # success_url = '/'
     #
-    # def post(self, request, *args, **kwargs):
-    #     form = RegistrationForm(request.POST)
-    #     if form.is_valid():
-    #         new_user = form.save(commit=False)
-    #         new_user.username = form.cleaned_data['username']
-    #         new_user.email = form.cleaned_data['email']
-    #         new_user.name = form.cleaned_data['name']
-    #         new_user.save()
-    #         new_user.set_password(form.cleaned_data['password'])
-    #         new_user.save()
-    #         MyUser.objects.create(user=new_user)
-    #         MyUser.objects.upgrade(cash='10000')
-    #         user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
-    #         login(request, user)
-    #         messages.success(request, 'Welcomm in our club')
-    #         return HttpResponseRedirect('/')
-    #     context = {'form': form}
-    #     return render(request, 'registration.html', context)
+    # def get_success_url(self):
+    #     return self.success_url
+    http_method_names = ['get', 'post']
+
+    def get(self, request, *args, **kwargs):
+        form = RegistrationForm(request.POST)
+        product = Product.objects.all()
+        context = {'form': form, 'product': product}
+        return render(request, 'registration.html', context)
+
+    def post(self, request, *args, **kwargs):
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            new_user = form.save(commit=False)
+            new_user.username = form.cleaned_data['username']
+            new_user.email = form.cleaned_data['email']
+            new_user.name = form.cleaned_data['name']
+            new_user.save()
+            new_user.set_password(form.cleaned_data['password'])
+            new_user.save()
+            MyUser.objects.create(user=new_user)
+            MyUser.objects.upgrade(cash='10000')
+            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            login(request, user)
+            messages.success(request, 'Welcomm in our club')
+            return HttpResponseRedirect('/')
+        context = {'form': form}
+        return render(request, 'registration.html', context)
 
 
 class UserLogout(LogoutView):
-    # def get(self, request, *args, **kwargs):
-    #     logout(request)
-    #     return HttpResponseRedirect('/')
+    login_url = '/products/'
+    template_name = 'log_out.html'
     next_page = '/'
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(PermissionRequiredMixin, CreateView):
+    login_url = '/login'
+    permission_required = 'request.user.is_superuser'
     model = Product
     form_class = ProductForm
     success_url = '/products/'
@@ -150,6 +160,9 @@ class ProductListView(ListView):
 
 
 class BuyingRedirectView(RedirectView):
+    model = Order
+    form_class = OrderForm
+
     def get(self, request, *args, **kwargs):
         product_id = request.POST['id']
         product = Product.objects.get(id=product_id)
@@ -176,7 +189,7 @@ class BuyingRedirectView(RedirectView):
 
 class OrderViewList(ListView, LoginRequiredMixin):
     model = Order
-    form = OrderForm
+    # form = OrderForm
     template_name = 'order.html'
     paginate_by = 5
     ordering = ['order_time']

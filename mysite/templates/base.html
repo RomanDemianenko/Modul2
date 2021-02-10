@@ -1,57 +1,129 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Shop Homepage</title>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  <!-- Custom styles for this template -->
+  <link href="css/shop-homepage.css" rel="stylesheet">
+
 </head>
+<style>
+    body {
+      padding-top: 56px;
+    }
+</style>
 <body>
         {% block content %}
         {% csrf_token %}
-    {% if user.superuser %}
-        <button><a href = '/update'>Add Products to Shop</a></button>
-        <button><a href = '/cancel'>Cancel orders</a></button>
-        <input type="submit" value="Buy">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+               {% if user.superuser %}
+                    <button><a href ="{% url 'update'%}">Add Products to Shop</a></button>
+                    <button><a href ="{% url 'cancel'%}">Cancel orders</a></button>
+                    <input type="submit" value="Buy">
 
-        {% if user.is_authenticated %}
-            <button><a href = '/logout'>Logout</a></button>
-            <button><a href = '/order'>My Orders</a></button>
-            <p>Your cash: {{user.cash}}</p>
+                   {% if user.is_authenticated %}
+                       <button><a href="{% url 'logout' %}">Logout</a></button>
+                       <button><a href={% url 'orders' %}>My Orders</a></button>
+                       <p>Your cash: {{ user.cash }}</p>
+                   {% endif %}
+                    {% else %}
+                        <button><a href ="{% url 'login'%}">Login</a></button>
+                        <button><a href ="{% url 'registration'%}">Registration</a></button>
+                {% endif %}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+
+    <div class="row">
+
+      <div class="col-lg-3 mt-5">
+        <div class="list-group">
+          {% for category in categories %}
+          <a href="{{ category.url }}" class="list-group-item">{{ category.name }} ({{ category.count }})</a>
+          {% endfor %}
+        </div>
+
+      </div>
+      <!-- /.col-lg-3 -->
+
+      <div class="col-lg-9">
+
+        {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            {% endfor %}
         {% endif %}
-    {% else %}
-        <button><a href = '/login'>Login</a></button>
-        <button><a href = '/registration'>Registration</a></button>
-    {% endif %}
 
+
+        <div class="row">
         {% for obj in object_list %}
             <form method="POST">
                 <h2>{{ obj.name }}</h2>
                 {% if obj.image %}
                     {{ obj.photo }}
                 {% endif %}
-                <p style="font-size: 150px">Characteristic: {{ obj.description }}</p>
-                <p style="font-size: 250px; color: red">{{ obj.price }}</p>
-                <p style="font-size: 200px"><strong>{{ obj.available }}</strong></p>
-
-
+                <p style="font-size: 50px">Characteristic: {{ obj.description }}</p>
+                <p style="font-size: 50px; color: red">{{ obj.price }}</p>
+{#                <p style="font-size: 50px"><strong>{{ obj.available }}</strong></p>#}
+                {% if user.is_authenticated %}
+                    <input name="quantity" style="font-size: 20px; color: blue" type="number" min="1" max="{{ obj.quantity }}">
+                    <input type="submit" value="Buy">
+                {% endif %}
+                {% if user.is_superuser %}
+                    <button><a href="/update/{{ obj.id }}"></a>Change info about this position</button>
+                {% endif %}
             </form>
         {% endfor %}
-        <div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; first</a>
-            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
+        </div>
+        <!-- /.row -->
+      {% endblock content %}
+      </div>
+      <!-- /.col-lg-9 -->
 
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </span>
+    </div>
+    <!-- /.row -->
 
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-        {% endif %}
-    </span>
-</div>
-    {% endblock %}
+  </div>
+  <!-- /.container -->
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Your Website 2020</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+  <!-- Bootstrap core JavaScript -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
 </body>
+
 </html>

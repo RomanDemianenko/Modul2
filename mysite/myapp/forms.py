@@ -1,31 +1,33 @@
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 
 from myapp.models import Product, Order, MyUser
 
 
-class LoginForm(forms.ModelForm):
+class LoginForm(forms.Form):
+    username = forms.TextInput()
     password = forms.CharField(widget=forms.PasswordInput)
 
     # def __init__(self, *args, **kwargs):
     #     super().__init__(self, *args, **kwargs)
-    #     self.fields['username'].label = 'Login'
-    #     self.fields['password'].label = 'Password'
+    #     self.fields.get('username').label = 'Login'
+    #     self.fields.get('password').label = 'Password'
 
     def clean(self):
-        username = self.cleaned_data['username']
-        password = self.cleaned_data['password']
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
         if not MyUser.objects.filter(username=username).exists():
             raise forms.ValidationError(f'Username with login {username} not find')
-        user = MyUser.objects.filter(username=username)
+        user = MyUser.objects.filter(username=username).first()
         if user:
             if not user.check_password(password):
                 raise forms.ValidationError(f'Incorect password')
         return self.cleaned_data
 
     class Meta:
-        model = User
+        model = MyUser
         fields = ['username', 'password']
 
 
@@ -56,8 +58,8 @@ class RegistrationForm(forms.ModelForm):
         return username
 
     def clean(self):
-        password = self.cleaned_data['password']
-        confirm_password = self.cleaned_data['confirm_password']
+        password = self.cleaned_data.get('password')
+        confirm_password = self.cleaned_data.get('confirm_password')
         if password != confirm_password:
             raise forms.ValidationError('Inncorect password')
         return self.cleaned_data

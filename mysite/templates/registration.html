@@ -2,12 +2,12 @@
 
 {% block content %}
 
-<div class="row" style="margin-bottom: 50px; margin-top: 50px">
+{#<div class="row" style="margin-bottom: 50px; margin-top: 50px">#}
     <h3 class="text-center">Registration a new user </h3>
-    <form action="/" method="POST">
+    <form action="{% url 'products' %}" method="POST">
         {% csrf_token %}
         {{ form }}
         <input type="submit" class="btn btn-success"  value="REGISTRATION">
     </form>
-</div>
+{#</div>#}
 {% endblock %}

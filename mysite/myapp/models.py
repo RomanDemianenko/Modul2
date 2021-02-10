@@ -7,14 +7,14 @@ from django.utils import timezone
 
 
 class MyUser(AbstractUser):
-    cash = models.DecimalField(decimal_places=5, max_digits=15, default=10000)
+    cash = models.DecimalField(decimal_places=2, max_digits=15, default=10000)
 
 
 class Product(models.Model):
     name = models.CharField(max_length=30)
     description = models.TextField(max_length=30, null=True)
     slug = models.SlugField(blank=True, null=True)
-    price = models.DecimalField(decimal_places=5, max_digits=15)
+    price = models.DecimalField(decimal_places=2, max_digits=15)
     image = models.ImageField(blank=True, null=True)
     quantity = models.PositiveIntegerField()
     available = models.BooleanField(default=False)
@@ -27,7 +27,7 @@ class Order(models.Model):
     costumer = models.ForeignKey(MyUser, related_name='costumer', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    total_price = models.DecimalField(decimal_places=5, max_digits=15)
+    total_price = models.DecimalField(decimal_places=2, max_digits=15)
     order_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
