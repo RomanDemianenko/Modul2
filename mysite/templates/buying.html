@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 <h3 class="text-center">Your Shipping</h3>
 {% block content %}
-    <form method="POST" action="{% url 'buying' %}">
+    <form method="POST">
         {% csrf_token %}
 
             <p style="font-size: 200px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>

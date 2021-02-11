@@ -16,5 +16,5 @@ urlpatterns = [
     path('order/', OrderViewList.as_view(), name='order'),
     path('order/return', ReturnOfGoodRedirectView.as_view()),
     path('cancel', CancelListView.as_view(), name='cancel'),
-    path('cancel/list', ReturnPositionRedirectsView.as_view())
+    path('cancel/list', ReturnPositionRedirectsView.as_view(), name='come_back')
 ]

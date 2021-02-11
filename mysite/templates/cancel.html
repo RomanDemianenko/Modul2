@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+
 {% block content %}
     {% for obj in object_list %}
         <form method="post">
         {% csrf_token %}
-
-
-            <input type="submit" value=" Accept Cancel">
+            {{ user.username }} buy {{ obj.name }} for {{ obj.total_price }}
+            <button><a href="{% url 'come_back' %}"></a>Buy</button>
         </form>
     {% endfor %}
 <div class="pagination">
