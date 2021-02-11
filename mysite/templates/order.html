@@ -3,12 +3,22 @@
 {% block content %}
     <form method="POST">
         {% csrf_token %}
+        {% if user.is_authenticated %}
         {% for obj in object_list %}
             <p style="font-size: 200px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
-            <input type="submit" value="Submit">
 
         {% endfor %}
+        {% endif %}
+    </form>
+        <form method="POST">
+        {% csrf_token %}
+        {% if user.is_superuser %}
+        {% for obj in object_list %}
+            <p style="font-size: 200px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
+            <button><a href="{% url 'cancel' %}"></a>Cancel the shipping</button>
 
+        {% endfor %}
+        {% endif %}
     </form>
 
 
