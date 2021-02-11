@@ -56,51 +56,28 @@ class BaseView(View):
 
 
 class UserLoginView(LoginView):
-    # form_class = AuthenticationForm
-    # success_url = '/'
-    # template_name = 'login.html'
-
-    # http_method_names = ['get', 'post']
-
-    # def get_success_url(self):
-    #     return self.success_url
 
     def get(self, request, *args, **kwargs):
         form = AuthenticationForm(request.POST)
-        # product = Product.objects.all()
         context = {'form': form}
-        # return self.render_to_response(self.get_context_data())
-        # return super().get(request=self.request)
         return render(request, 'login.html', context)
 
     def post(self, request, *args, **kwargs):
-        # form = self.get_form(AuthenticationForm)
         form = LoginForm(request.POST)
-        print('hello1')
         if form.is_valid():
-            print('hello2')
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(username=username, password=password)
-            print('hello22')
             if user:
-                print('hello3')
                 if user.is_active:
                     login(request, user)
-                    print('hello4')
                     messages.success(request, 'You are login')
                     return HttpResponseRedirect('/')
-                # return self.form_valid(form)
             else:
                 messages.warning(request, 'You have login already')
         else:
-            # username = form.cleaned_data['username']
-            # password = form.cleaned_data['password']
-            # user = authenticate(username=username, password=password)
-            # login(request, user)
             print('hello45')
             return HttpResponseRedirect('/')
-            # return self.form_invalid(form)
 
         context = {'form': form}
         return render(request, 'login.html', context)
@@ -108,39 +85,29 @@ class UserLoginView(LoginView):
 
 class RegistrationView(CreateView):
     model = MyUser
-    form_class = RegistrationForm
-    template_name = 'registration.html'
-    success_url = '/'
 
-    def get_success_url(self):
-        return self.success_url
+    def get(self, request, *args, **kwargs):
+        form = RegistrationForm(request.POST)
+        product = Product.objects.all()
+        context = {'form': form, 'product': product}
+        return render(request, 'registration.html', context)
 
-    http_method_names = ['get', 'post']
-
-    # def get(self, request, *args, **kwargs):
-    #     form = RegistrationForm(request.POST)
-    #     product = Product.objects.all()
-    #     context = {'form': form, 'product': product}
-    #     return render(request, 'registration.html', context)
-    #
-    # def post(self, request, *args, **kwargs):
-    #     form = RegistrationForm(request.POST)
-    #     if form.is_valid():
-    #         new_user = form.save(commit=False)
-    #         new_user.username = form.cleaned_data['username']
-    #         new_user.email = form.cleaned_data['email']
-    #         new_user.name = form.cleaned_data['name']
-    #         new_user.save()
-    #         new_user.set_password(form.cleaned_data['password'])
-    #         new_user.save()
-    #         MyUser.objects.create(user=new_user)
-    #         MyUser.objects.upgrade(cash='10000')
-    #         user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
-    #         login(request, user)
-    #         messages.success(request, 'Welcomm in our club')
-    #         return HttpResponseRedirect('/')
-    #     context = {'form': form}
-    #     return render(request, 'registration.html', context)
+    def post(self, request, *args, **kwargs):
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            new_user = form.save(commit=False)
+            new_user.username = form.cleaned_data['username']
+            new_user.email = form.cleaned_data['email']
+            new_user.name = form.cleaned_data['name']
+            new_user.save()
+            new_user.set_password(form.cleaned_data['password'])
+            new_user.save()
+            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            login(request, user)
+            messages.success(request, 'Welcomm in our club')
+            return HttpResponseRedirect('/')
+        context = {'form': form}
+        return render(request, 'registration.html', context)
 
 
 class UserLogout(LogoutView):
@@ -161,7 +128,6 @@ class ProductCreateView(PermissionRequiredMixin, CreateView):
 class ProductUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'request.user.is_superuser'
     model = Product
-
     fields = '__all__'
     template_name = 'update.html'
     success_url = '/'
@@ -175,32 +141,34 @@ class ProductListView(ListView):
     template_name = 'base.html'
 
 
-class BuyingRedirectView(RedirectView):
+class BuyingCreateView(CreateView):
     model = Order
     form_class = OrderForm
+    success_url = '/'
+    template_name = 'buying.html'
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        user_id = request.POST['id']
+        user = MyUser.objects.filter(id=user_id).first()
         product_id = request.POST['id']
-        product = Product.objects.get(id=product_id)
+        product = Product.objects.filter(id=product_id).first()
         user_quantity = request.POST['quantity']
         user_quantity = int(user_quantity)
         if product.quantity >= user_quantity:
-            customer_id = request.customer.id
-            user = MyUser.objects.get(id=customer_id)
-            if user.cash < (product.price * user_quantity):
+            if user.cash >= product.total_price:
                 product.quantity -= user_quantity
-                user.cash -= product.price * user_quantity
+                user.cash -= product.total_price
                 order = Order.objects.create(customer=user, product=product,
-                                             total_price=product.price * user_quantity)
+                                             total_price=product.total_price)
                 user.save()
                 product.save()
                 order.save()
-                messages.success(request, 'Thx for using our servers')
+                messages.success(self.request, 'Thx for using our servers')
             else:
-                messages.warning(request, 'You need to fill up a wallet')
+                messages.warning(self.request, 'You need to fill up a wallet')
         else:
-            messages.warning(request, 'We don`t have enough staff')
-        return HttpResponseRedirect('/')
+            messages.warning(self.request, 'We don`t have enough staff')
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class OrderViewList(ListView, LoginRequiredMixin):

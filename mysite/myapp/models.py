@@ -24,14 +24,14 @@ class Product(models.Model):
 
 
 class Order(models.Model):
-    costumer = models.ForeignKey(MyUser, related_name='costumer', on_delete=models.CASCADE)
+    customer = models.ForeignKey(MyUser, related_name='costumer', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(decimal_places=2, max_digits=15)
     order_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f'{self.product} was bought by {self.costumer} at {self.order_time}'
+        return f'{self.product} was bought by {self.customer} at {self.order_time}'
 
     def save(self, *args, **kwargs):
         self.total_price = self.quantity * self.product.price

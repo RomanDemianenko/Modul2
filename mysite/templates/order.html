@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+
 {% block content %}
-    <form action="base.html" method="POST">
+    <form method="POST">
         {% csrf_token %}
         {% for obj in object_list %}
             <p style="font-size: 200px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
-            <input type="submit" value="Cancel">
+            <input type="submit" value="Submit">
 
         {% endfor %}
 

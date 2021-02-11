@@ -34,7 +34,7 @@
                 <ul class="navbar-nav ml-auto">
                     {% if user.username %}
                         <button><a href="{% url 'logout' %}">Logout</a></button>
-                        <button><a href={% url 'orders' %}>My Orders</a></button>
+                        <button><a href={% url 'order' %}>My Orders</a></button>
                         <p style="color: white">Your cash: {{ user.cash }}</p>
 {#                        {% if user.superuser %}#}
                             <li class="nav-item">
@@ -97,18 +97,24 @@
     <div class="row">
         {% for obj in object_list %}
             <form method="POST">
+            {% csrf_token %}
                 <h2>{{ obj.name }}</h2>
                 {% if obj.image %}
                     {{ obj.photo }}
                 {% endif %}
                 <p style="font-size: 30px">Characteristic: {{ obj.description }}</p>
                 <p style="font-size: 30px; color: red">{{ obj.price }}</p>
-                {#                <p style="font-size: 50px"><strong>{{ obj.available }}</strong></p>#}
+            <form method="POST" action="{% url 'buying' %}">
+            {% csrf_token %}
                 {% if user.is_authenticated %}
                     <input name="quantity" style="font-size: 20px; color: blue" type="number" min="1"
                            max="{{ obj.quantity }}">
-                    <input type="submit" value="Buy">
+{#                    <input type="submit" value="Buy">#}
+                    <button><a href="{% url 'buying' %}"></a>Buy</button>
                 {% endif %}
+            </form>
+            <form method="POST" action="{% url 'update' obj.id %}">
+            {% csrf_token %}
                 {% if request.user.is_superuser %}
                     <button><a href="{% url 'update' obj.id %}"></a>Change info about this position</button>
                 {% endif %}
