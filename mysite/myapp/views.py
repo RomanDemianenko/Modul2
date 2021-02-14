@@ -160,25 +160,26 @@ class CancelListView(PermissionRequiredMixin, ListView):
     paginate_by = 5
 
 
-class ReturnOfGoodCreateView(CreateView, LoginRequiredMixin):
-    model = Cancel
-    form_class = CancelForm
-    login_url = '/login/'
+class ReturnOfGoodRedirectView(RedirectView, LoginRequiredMixin):
+    # model = Cancel
+    # form_class = CancelForm
+    # login_url = '/login/'
 
-    def form_valid(self, form):
-        order_id = form.cleaned_data.get('cancel').id
+    def get(self, request, *args, **kwargs):
+        order_id = request.POST.get('cancel')
+        # order_id = form.cleaned_data.get('cancel').id
         order = Order.objects.get(id=order_id)
         if order_id is None:
-            messages.info(self.request, 'There is nothing to talk about')
+            messages.info(request, 'There is nothing to talk about')
             return HttpResponseRedirect('/')
 
         if datetime.now(timezone.utc) - order.order_time < timedelta(seconds=180):
             cancel = Cancel.objects.create(come_back=order)
             cancel.save()
-            messages.info(self.request, 'YOU cancelled the order(((((')
+            messages.info(request, 'YOU cancelled the order(((((')
         else:
-            messages.warning(self.request, 'You`are late')
-        return HttpResponseRedirect('order/')
+            messages.warning(request, 'You`are late')
+        return HttpResponseRedirect('/order/')
 
 
 class ReturnPositionRedirectsView(PermissionRequiredMixin, RedirectView):
@@ -199,4 +200,4 @@ class ReturnPositionRedirectsView(PermissionRequiredMixin, RedirectView):
         product.save()
         Cancel.objects.get(id=cancel_id).delete()
         messages.info(request, 'Order Cancelled')
-        return HttpResponseRedirect('/cancel')
+        return HttpResponseRedirect('/cancel/')
