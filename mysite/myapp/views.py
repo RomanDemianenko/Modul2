@@ -179,7 +179,7 @@ class ReturnOfGoodRedirectView(RedirectView, LoginRequiredMixin):
             messages.info(request, 'YOU cancelled the order(((((')
         else:
             messages.warning(request, 'You`are late')
-        return HttpResponseRedirect('/order/')
+        return HttpResponseRedirect('/')
 
 
 class ReturnPositionRedirectsView(PermissionRequiredMixin, RedirectView):
