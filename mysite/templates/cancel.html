@@ -2,12 +2,18 @@
 
 {% block content %}
     {% for obj in object_list %}
-        <form method="post">
+        <form method="post" action="{% url 'come_back' obj.id %}">
         {% csrf_token %}
-            {{ user.username }} buy {{ obj.name }} for {{ obj.total_price }}
-            <button><a href="{% url 'come_back' %}"></a>Buy</button>
+            {{ obj.cancel.customer }} bought {{ obj.quantity }} {{ obj.name }} in {{ obj.price }}
+            <button>Return Money</button>
+            <input type="hidden" name="id" value="{{ obj.id }}">
         </form>
     {% endfor %}
+
+
+
+
+
 <div class="pagination">
     <span class="step-links">
         {% if page_obj.has_previous %}

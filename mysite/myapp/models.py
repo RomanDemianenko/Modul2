@@ -24,7 +24,7 @@ class Product(models.Model):
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(MyUser, related_name='costumer', on_delete=models.CASCADE)
+    customer = models.ForeignKey(MyUser, related_name='customer', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(decimal_places=2, max_digits=15)

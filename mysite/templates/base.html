@@ -104,13 +104,15 @@
                 {% endif %}
                 <p style="font-size: 30px">Characteristic: {{ obj.description }}</p>
                 <p style="font-size: 30px; color: red">{{ obj.price }}</p>
+            </form>
             <form method="POST" action="{% url 'buying' %}">
             {% csrf_token %}
                 {% if user.is_authenticated %}
                     <input name="quantity" style="font-size: 20px; color: blue" type="number" min="1"
                            max="{{ obj.quantity }}">
-{#                    <input type="submit" value="Buy">#}
-                    <button><a href="{% url 'buying' %}"></a>Buy</button>
+                    <input name="customer" type="hidden" value="{{ user.id }}">
+                    <input name="product" type="hidden" value="{{ obj.id }}">
+                    <button>Buy</button>
                 {% endif %}
             </form>
             <form method="POST" action="{% url 'update' obj.id %}">

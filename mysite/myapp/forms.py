@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 
-from myapp.models import Product, Order, MyUser
+from myapp.models import Product, Order, MyUser, Cancel
 
 
 class LoginForm(forms.Form):
@@ -54,4 +54,10 @@ class ProductForm(ModelForm):
 class OrderForm(ModelForm):
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = ['customer', 'product', 'quantity']
+
+
+class CancelForm(ModelForm):
+    class Meta:
+        model = Cancel
+        fields = ['come_back']

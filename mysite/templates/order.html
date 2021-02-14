@@ -1,25 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <form method="POST">
+    <form method="POST" action="{% url 'return' %}">
         {% csrf_token %}
-        {% if user.is_authenticated %}
-        {% for obj in object_list %}
-            <p style="font-size: 200px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
-
-        {% endfor %}
+        {% if user %}
+            {% for obj in object_list %}
+                <p style="font-size: 50px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
+                <input type="hidden" name="cancel" value="{{ obj.id }}">
+                <button>Cancel the shipping</button>
+            {% endfor %}
         {% endif %}
     </form>
-        <form method="POST">
-        {% csrf_token %}
-        {% if user.is_superuser %}
-        {% for obj in object_list %}
-            <p style="font-size: 200px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
-            <button><a href="{% url 'cancel' %}"></a>Cancel the shipping</button>
-
-        {% endfor %}
-        {% endif %}
-    </form>
+    {#    <form method="POST" action="{% url 'cancel' order.id %}">#}
+    {#        {% csrf_token %}#}
+    {#        {% if user.is_superuser %}#}
+    {#            <input type="hidden" name="order" value="{{ order.id }}">#}
+    {#            <button><a href="{% url 'cancel'  %}"></a>Cancel the shipping</button>#}
+    {#        {% endif %}#}
+    {#    </form>#}
 
 
 

@@ -4,7 +4,8 @@
     <form method="POST">
         {% csrf_token %}
 
-            <p style="font-size: 200px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
+            <p style="font-size: 50px">Your buy {{ obj.name }} for {{ obj.total_price }}</p>
+{#        <input type="hidden"  {{ obj.id }} {{ user.id }}>#}
             <p>Come back</p>
 
     </form>

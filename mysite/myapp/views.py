@@ -12,38 +12,8 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, RedirectView
 from django.views.generic.base import View
 
-from myapp.forms import RegistrationForm, ProductForm, OrderForm, LoginForm
+from myapp.forms import RegistrationForm, ProductForm, OrderForm, LoginForm, CancelForm
 from myapp.models import Product, MyUser, Order, Cancel
-
-
-# class CartMixin():
-#
-#     def dispatch(self, request, *args, **kwargs):
-#         if request.user.is_authenticated:
-#             customer = Customer.objects.filter(user=request.user).first()
-#             if not customer:
-#                 customer = Customer.objects.create(
-#                     user=request.user
-#                 )
-#             cart = Cart.objects.filter(owner=customer, in_order=False).first()
-#             if not cart:
-#                 cart = Cart.objects.create(owner=customer)
-#         else:
-#             cart = Cart.objects.filter(for_anonymous_user=True).first()
-#             if not cart:
-#                 cart = Cart.objects.create(for_anonymous_user=True)
-#         self.cart = cart
-#         return super().dispatch(request, *args, **kwargs)
-#
-#
-
-
-# class AddToCartView(CartMixin):
-#
-#     def get(self, request, *args, **kwargs):
-#         product_slug = kwargs.get('slug')
-#         product = Product.objects.get(slug=product_slug)
-#         car
 
 
 class BaseView(View):
@@ -148,18 +118,20 @@ class BuyingCreateView(CreateView):
     template_name = 'buying.html'
 
     def post(self, request, *args, **kwargs):
-        user_id = request.POST['id']
-        user = MyUser.objects.filter(id=user_id).first()
-        product_id = request.POST['id']
-        product = Product.objects.filter(id=product_id).first()
+        # form = OrderForm(request.POST)
+
         user_quantity = request.POST['quantity']
         user_quantity = int(user_quantity)
+        product_id = request.POST['product']
+        product = Product.objects.get(id=product_id)
+        user_id = request.POST['customer']
+        user = MyUser.objects.get(id=user_id)
         if product.quantity >= user_quantity:
-            if user.cash >= product.total_price:
+            if user.cash >= user_quantity * product.price:
                 product.quantity -= user_quantity
-                user.cash -= product.total_price
+                user.cash -= user_quantity * product.price
                 order = Order.objects.create(customer=user, product=product,
-                                             total_price=product.total_price)
+                                             total_price=user_quantity * product.price)
                 user.save()
                 product.save()
                 order.save()
@@ -168,7 +140,7 @@ class BuyingCreateView(CreateView):
                 messages.warning(self.request, 'You need to fill up a wallet')
         else:
             messages.warning(self.request, 'We don`t have enough staff')
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect('/')
 
 
 class OrderViewList(ListView, LoginRequiredMixin):
@@ -176,7 +148,7 @@ class OrderViewList(ListView, LoginRequiredMixin):
     # form = OrderForm
     template_name = 'order.html'
     paginate_by = 5
-    ordering = ['order_time']
+    ordering = ['-order_time']
     login_url = '/login'
 
 
@@ -188,28 +160,36 @@ class CancelListView(PermissionRequiredMixin, ListView):
     paginate_by = 5
 
 
-class ReturnOfGoodRedirectView(RedirectView):
-    def get(self, request, *args, **kwargs):
-        order_id = request.POST.get('id')
-        if order_id is None:
-            messages.info(request, 'There is nothing to talk about')
-            return HttpResponseRedirect('/')
+class ReturnOfGoodCreateView(CreateView, LoginRequiredMixin):
+    model = Cancel
+    form_class = CancelForm
+    login_url = '/login/'
+
+    def form_valid(self, form):
+        order_id = form.cleaned_data.get('cancel').id
         order = Order.objects.get(id=order_id)
+        if order_id is None:
+            messages.info(self.request, 'There is nothing to talk about')
+            return HttpResponseRedirect('/')
+
         if datetime.now(timezone.utc) - order.order_time < timedelta(seconds=180):
             cancel = Cancel.objects.create(come_back=order)
             cancel.save()
-            messages.info(request, 'YOU cancelled the order(((((')
+            messages.info(self.request, 'YOU cancelled the order(((((')
         else:
-            messages.warning(request, 'You`are late')
-        return HttpResponseRedirect('/order/')
+            messages.warning(self.request, 'You`are late')
+        return HttpResponseRedirect('order/')
 
 
-class ReturnPositionRedirectsView(RedirectView):
+class ReturnPositionRedirectsView(PermissionRequiredMixin, RedirectView):
+    permission_required = 'request.user.is_superuser'
+
     def get(self, request, *args, **kwargs):
-        post_id = request.POST.get('id')
-        if post_id is None:
+        cancel_id = request.POST.get('id')
+        if cancel_id is None:
+            messages.info(self.request, 'There is nothing to talk about')
             HttpResponseRedirect('/')
-        cancel_id = Cancel.objects.get(id=post_id).come_back.customer.id
+        cancel_id = Cancel.objects.get(id=cancel_id).come_back.customer.id
         user = MyUser.objects.get(id=cancel_id)
         user.cash = Cancel.objects.get(id=cancel_id).come_back.total_price
         user.save()
