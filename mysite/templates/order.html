@@ -5,7 +5,7 @@
         {% csrf_token %}
         {% if user %}
             {% for obj in object_list %}
-                <p style="font-size: 50px">Your buy {{ obj.product.name }} for {{ obj.total_price }} in {{ obj.order_time }}</p>
+                <p style="font-size: 50px">Your buy {{ obj.product.name }} for {{ obj.total_price }} on {{ obj.order_time }}</p>
                 <input type="hidden" name="cancel" value="{{ obj.id }}">
                 <button>Cancel the shipping</button>
             {% endfor %}
